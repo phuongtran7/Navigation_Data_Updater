@@ -30,6 +30,7 @@ void downloader::download_current_data(std::optional<std::string> url)
 {
 	if (url.has_value())
 	{
+		console->info("Start downloading...");
 		const auto complete_url = conversions::to_string_t(url.value());
 		http_client download_client(complete_url);
 
@@ -54,11 +55,16 @@ void downloader::download_current_data(std::optional<std::string> url)
 				{
 					// ReSharper disable once CppExpressionWithoutSideEffects
 					download.wait();
+					console->info("Finished downloading.");
 				}
 				catch (const std::exception & e)
 				{
 					console->critical("Error exception: {}", e.what());
 				}
+	}
+	else
+	{
+		console->critical("Cannot find URL to download.");
 	}
 }
 
@@ -67,13 +73,14 @@ void downloader::extract_files() const
 {
 	try
 	{
+		console->info("Start extracting zip file into Output folder.");
 		// Extract the zip file
 		const bit7z::Bit7zLibrary lib(L"7z.dll");
 		const bit7z::BitExtractor extractor(lib, bit7z::BitFormat::Zip);
 
 		// Create temporary folder to store extracted files
 		fs::create_directory("Output");
-
+		
 		// Extract and override the current files with whole file name and extension
 		extractor.extract(conversions::to_string_t(file_name_->c_str()), L"Output/");
 
@@ -81,7 +88,7 @@ void downloader::extract_files() const
 	}
 	catch (const std::exception & e)
 	{
-		std::cout << "Error: " << e.what() << "\n";
+		console->critical("Error extracting file: {}.", e.what());
 	}
 }
 
@@ -146,9 +153,12 @@ std::optional<std::string> downloader::get_current_data_url()
 						{
 							return std::string("");
 						}
-
+						
 						// Currently does not know how to switch to JSON response so just use XML for now
 						std::string return_url = doc.child("productSet").child("edition").child("product").attribute("url").as_string();
+
+						console->info("Found current CIFP data:");
+						console->info(return_url);
 						return return_url;
 
 					});
@@ -173,7 +183,7 @@ std::optional<std::string> downloader::get_current_data_url()
 			}
 }
 
-std::optional<std::string> downloader::extract_zip_file_name(const std::string& input) const
+std::optional<std::string> downloader::extract_zip_file_name(const std::string& input)
 {
 	const std::regex expression(R"((CIFP_).*(\.zip))");
 
@@ -188,25 +198,36 @@ std::optional<std::string> downloader::extract_zip_file_name(const std::string& 
 
 void downloader::convert_to_x_plane_format() const
 {
-	if (fs::exists("Output"))
+	console->info("Start converting FAACIFP18 to X-Plane format. Please wait.");
+	// Guess the current name of the folder inside the zip file as it
+	// different from the zip name itself.
+	for (auto& p : fs::directory_iterator("Output"))
 	{
 		std::wstring directory_name;
-		for (auto& p : fs::directory_iterator("Output"))
+		directory_name.append(p.path().c_str());
+		directory_name.append(U("\\FAACIFP18"));
+		if (fs::exists(directory_name))
 		{
-			directory_name.append(p.path().c_str());
-			directory_name.append(U("\\FAACIFP18"));
-			if (fs::exists(directory_name))
+			// Found the file
+			fs::copy_file(directory_name, "Output\\FAACIFP18", fs::copy_options::overwrite_existing);
+			// Remove all unessesary files
+			fs::remove_all(p.path().c_str());
+			// Copy X-Plane tool to Output folder to convert FAACIFP18 file
+			try
 			{
-				// Found the file
-				fs::copy_file(directory_name, "Output\\FAACIFP18", fs::copy_options::overwrite_existing);
-				// Remove all unessesary files
-				fs::remove_all(p.path().c_str());
-				// Copy X-Plane tool to Output folder to convert FAACIFP18 file
 				fs::copy_file("convert424toxplane11.exe", "Output\\convert424toxplane11.exe", fs::copy_options::overwrite_existing);
-				std::system("cd Output && convert424toxplane11 FAACIFP18 \"CSF\"");
-				fs::rename("Output\\FAACIFP18", "Output\\earth_424.dat");
-				fs::remove("Output\\convert424toxplane11.exe");
 			}
+			catch (fs::filesystem_error)
+			{
+				console->critical("convert424toxplane11.exe not found.");
+				fs::remove_all("Output");
+				break;
+			}
+			std::system("cd Output && convert424toxplane11 FAACIFP18 \"CSF\"");
+			fs::rename("Output\\FAACIFP18", "Output\\earth_424.dat");
+			fs::remove("Output\\convert424toxplane11.exe");
+			break;
 		}
 	}
+
 }
