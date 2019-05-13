@@ -1,9 +1,14 @@
 // Navigation_Data_Updater.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
+#include  "Downloader.h"
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
+	downloader new_downloader;
+	new_downloader.initialize();
+	new_downloader.run();
+	new_downloader.shutdown();
+
+	std::getchar();
 }
