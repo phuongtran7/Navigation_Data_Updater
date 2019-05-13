@@ -68,6 +68,55 @@ void downloader::download_current_data(std::optional<std::string> url)
 	}
 }
 
+void downloader::get_expiration_date()
+{
+	uri_builder builder;
+	builder.set_path(U("/cifp/chart?edition=next"));
+	const pplx::task<void> get_url = client_->request(methods::GET, builder.to_string())
+
+		// Handle response headers arriving.
+		.then([=](const http_response & response)
+			{
+				if (response.status_code() != status_codes::OK)
+				{
+					console->critical("Received response status code from Get Latest Release querry: {}.", response.status_code());
+					throw;
+				}
+
+				// Extract JSON out of the response
+				return response.extract_utf8string();
+			})
+		// parse XML
+				.then([=](const std::string & xml_data)
+					{
+						pugi::xml_document doc;
+						const pugi::xml_parse_result result = doc.load_string(xml_data.c_str());
+
+						if (!result)
+						{
+							return;
+						}
+
+						// Currently does not know how to switch to JSON response so just use XML for now
+						const std::string expiration_date = doc.child("productSet").child("edition").child("editionDate").text().as_string();
+
+						console->warn("The data will expire on: {}", expiration_date);
+						console->warn("Please make to run this again before then.");
+					});
+
+			// Wait for all the outstanding I/O to complete and handle any exceptions
+			try
+			{
+				// ReSharper disable once CppExpressionWithoutSideEffects
+				get_url.wait();
+
+			}
+			catch (const std::exception & e)
+			{
+				console->critical("Error exception: {}", e.what());
+			}
+}
+
 // Extract the download zip file and override the old files
 void downloader::extract_files() const
 {
@@ -80,7 +129,7 @@ void downloader::extract_files() const
 
 		// Create temporary folder to store extracted files
 		fs::create_directory("Output");
-		
+
 		// Extract and override the current files with whole file name and extension
 		extractor.extract(conversions::to_string_t(file_name_->c_str()), L"Output/");
 
@@ -111,6 +160,7 @@ void downloader::run()
 	download_current_data(url);
 	extract_files();
 	convert_to_x_plane_format();
+	get_expiration_date();
 }
 
 void downloader::shutdown()
@@ -153,7 +203,7 @@ std::optional<std::string> downloader::get_current_data_url()
 						{
 							return std::string("");
 						}
-						
+
 						// Currently does not know how to switch to JSON response so just use XML for now
 						std::string return_url = doc.child("productSet").child("edition").child("product").attribute("url").as_string();
 
