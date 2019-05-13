@@ -1,5 +1,5 @@
 # Navigation Data Updater
-<h4 align="center">A command line program to build download and convert FAA CIFP to X-Plane format.</h4>
+<h4 align="center">A command line program to download and convert FAA CIFP to X-Plane format.</h4>
 
 Navigation Data Updater (NDU) is a command line program used to download FAA <a href="https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/cifp/download/">CIFP</a> data and convert it into X-Plane understandable format. NDU uses <a href="https://github.com/Microsoft/cpprestsdk">cpprestsdk</a>, <a href="https://github.com/gabime/spdlog">spdlog</a>, <a href="https://github.com/zeux/pugixml">pugixml</a> and <a href="https://github.com/rikyoz/bit7z">bit7z</a>.
 

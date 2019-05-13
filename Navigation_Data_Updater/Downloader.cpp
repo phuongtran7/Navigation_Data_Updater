@@ -79,7 +79,7 @@ void downloader::get_expiration_date()
 			{
 				if (response.status_code() != status_codes::OK)
 				{
-					console->critical("Received response status code from Get Latest Release querry: {}.", response.status_code());
+					console->critical("Received response status code from Get Expiration querry: {}.", response.status_code());
 					throw;
 				}
 
@@ -101,7 +101,7 @@ void downloader::get_expiration_date()
 						const std::string expiration_date = doc.child("productSet").child("edition").child("editionDate").text().as_string();
 
 						console->warn("The data will expire on: {}", expiration_date);
-						console->warn("Please make to run this again before then.");
+						console->warn("Please make sure to run this again before then.");
 					});
 
 			// Wait for all the outstanding I/O to complete and handle any exceptions
