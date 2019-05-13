@@ -24,3 +24,7 @@ If you don't want to compile the program by yourself, you can head over the <a h
 2. Start "Navigation_Data_Updater.exe"
 3. Wait until finish and copy the entire content of `Ouput` folder to `{X-Plane Root}/Custom Data`. 
 4. Start X-Plane.
+
+## Resources
+1. FAA's Aeronautical Data and Products: https://www.faa.gov/got_data/aero_data/
+2. Coded Instrument Flight Procedures API: https://app.swaggerhub.com/apis/FAA/APRA/1.2.0#/Coded%20Instrument%20Flight%20Procedures%20(CIFP)/getCIFPRelease
