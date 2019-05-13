@@ -11,13 +11,16 @@
 #include <bitextractor.hpp>
 #include "pugixml.hpp"
 #include <winhttp.h>
+#include <regex>
 class downloader
 {
 	std::shared_ptr<web::http::client::http_client> client_;
+	std::shared_ptr<std::string>file_name_; // name of the downloaded zip file.
 	bool start_console_log();
 	void download_current_data(std::optional<std::string> url);
 	void extract_files() const;
 	std::optional<std::string> get_current_data_url();
+	std::string extract_zip_file_name(const std::string& input);
 public:
 	std::shared_ptr<spdlog::logger> console{};
 	void initialize();

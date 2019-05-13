@@ -22,6 +22,12 @@ bld/
 [Oo]bj/
 [Ll]og/
 
+# Ignore Temp folder created by downloading the zip file
+[Tt]emp/
+
+# Ignore downloaded zip file
+CIFP_*.zip
+
 # Visual Studio 2015 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
