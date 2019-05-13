@@ -217,7 +217,7 @@ void downloader::convert_to_x_plane_format() const
 			{
 				fs::copy_file("convert424toxplane11.exe", "Output\\convert424toxplane11.exe", fs::copy_options::overwrite_existing);
 			}
-			catch (fs::filesystem_error)
+			catch (fs::filesystem_error&)
 			{
 				console->critical("convert424toxplane11.exe not found.");
 				fs::remove_all("Output");
