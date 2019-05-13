@@ -23,10 +23,13 @@ bld/
 [Ll]og/
 
 # Ignore Temp folder created by downloading the zip file
-[Tt]emp/
+[Oo]utput/
 
 # Ignore downloaded zip file
 CIFP_*.zip
+
+# Ignore X-Plane tool
+convert424toxplane11.exe
 
 # Visual Studio 2015 cache/options directory
 .vs/

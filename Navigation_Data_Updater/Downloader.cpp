@@ -33,7 +33,7 @@ void downloader::download_current_data(std::optional<std::string> url)
 		const auto complete_url = conversions::to_string_t(url.value());
 		http_client download_client(complete_url);
 
-		file_name_ = std::make_shared<std::string>(extract_zip_file_name(url.value()));
+		file_name_ = std::make_shared<std::string>(extract_zip_file_name(url.value()).value());
 
 		const auto download = download_client.request(methods::GET)
 			.then([=](const http_response & response)
@@ -45,12 +45,14 @@ void downloader::download_current_data(std::optional<std::string> url)
 				{
 					// Get the whole file name and extension
 					auto rwbuf = file_buffer<uint8_t>::open(conversions::to_string_t(file_name_->c_str())).get();
+					// ReSharper disable once CppExpressionWithoutSideEffects
 					is.read_to_end(rwbuf).get();
 					rwbuf.close().get();
 				});
 
 				try
 				{
+					// ReSharper disable once CppExpressionWithoutSideEffects
 					download.wait();
 				}
 				catch (const std::exception & e)
@@ -70,10 +72,10 @@ void downloader::extract_files() const
 		const bit7z::BitExtractor extractor(lib, bit7z::BitFormat::Zip);
 
 		// Create temporary folder to store extracted files
-		fs::create_directory("Temp");
+		fs::create_directory("Output");
 
 		// Extract and override the current files with whole file name and extension
-		extractor.extract(conversions::to_string_t(file_name_->c_str()), L"Temp/");
+		extractor.extract(conversions::to_string_t(file_name_->c_str()), L"Output/");
 
 		fs::remove(file_name_->c_str());
 	}
@@ -98,9 +100,10 @@ void downloader::initialize()
 
 void downloader::run()
 {
-	auto url = get_current_data_url();
+	const auto url = get_current_data_url();
 	download_current_data(url);
 	extract_files();
+	convert_to_x_plane_format();
 }
 
 void downloader::shutdown()
@@ -170,7 +173,7 @@ std::optional<std::string> downloader::get_current_data_url()
 			}
 }
 
-std::string downloader::extract_zip_file_name(const std::string& input)
+std::optional<std::string> downloader::extract_zip_file_name(const std::string& input) const
 {
 	const std::regex expression(R"((CIFP_).*(\.zip))");
 
@@ -179,5 +182,31 @@ std::string downloader::extract_zip_file_name(const std::string& input)
 	if (std::regex_search(input, match, expression))
 	{
 		return match[0];
+	}
+	return std::nullopt;
+}
+
+void downloader::convert_to_x_plane_format() const
+{
+	if (fs::exists("Output"))
+	{
+		std::wstring directory_name;
+		for (auto& p : fs::directory_iterator("Output"))
+		{
+			directory_name.append(p.path().c_str());
+			directory_name.append(U("\\FAACIFP18"));
+			if (fs::exists(directory_name))
+			{
+				// Found the file
+				fs::copy_file(directory_name, "Output\\FAACIFP18", fs::copy_options::overwrite_existing);
+				// Remove all unessesary files
+				fs::remove_all(p.path().c_str());
+				// Copy X-Plane tool to Output folder to convert FAACIFP18 file
+				fs::copy_file("convert424toxplane11.exe", "Output\\convert424toxplane11.exe", fs::copy_options::overwrite_existing);
+				std::system("cd Output && convert424toxplane11 FAACIFP18 \"CSF\"");
+				fs::rename("Output\\FAACIFP18", "Output\\earth_424.dat");
+				fs::remove("Output\\convert424toxplane11.exe");
+			}
+		}
 	}
 }
