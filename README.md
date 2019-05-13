@@ -3,7 +3,7 @@
 
 Navigation Data Updater (NDU) is a command line program used to download FAA <a href="https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/cifp/download/">CIFP</a> data and convert it into X-Plane understandable format. NDU uses <a href="https://github.com/Microsoft/cpprestsdk">cpprestsdk</a>, <a href="https://github.com/gabime/spdlog">spdlog</a>, <a href="https://github.com/zeux/pugixml">pugixml</a> and <a href="https://github.com/rikyoz/bit7z">bit7z</a>.
 
-The project also needs 7-Zip DLL to extract the data from downloaded update files, and <a href="https://developer.x-plane.com/article/navdata-in-x-plane-11/">convert424toxp11.exe</a>.
+The project also needs 7-Zip DLL to extract the data from downloaded update files, and <a href="https://developer.x-plane.com/article/navdata-in-x-plane-11/">convert424toxp11.exe</a> from X-Plane Developer Site.
 
 Because the data is from FAA so the ouput will only usable for US domestic flights.
 
@@ -11,7 +11,7 @@ Because the data is from FAA so the ouput will only usable for US domestic fligh
 ### Windows
 If you don't want to compile the program by yourself, you can head over the <a href="https://github.com/phuongtran7/Navigation_Data_Updater/releases">releases</a> tab a get a pre-compiled version.
 
-1. Install cpprestsdk, spdlog, rapidjson and cpptoml with Microsoft's <a href="https://github.com/Microsoft/vcpkg">vcpkg</a>.
+1. Install cpprestsdk, spdlog and pugixml with Microsoft's <a href="https://github.com/Microsoft/vcpkg">vcpkg</a>.
     * `vcpkg install cpprestsdk`
     * `vcpkg install spdlog`
     * `vcpkg install pugixml`
