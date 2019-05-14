@@ -152,6 +152,8 @@ void downloader::initialize()
 		WinHttpSetOption(handle, WINHTTP_OPTION_CLIENT_CERT_CONTEXT, WINHTTP_NO_CLIENT_CERT_CONTEXT, 0);
 		});
 	client_ = std::make_shared<http_client>(U("https://soa.smext.faa.gov/apra"), config);
+
+	clean_up();
 }
 
 void downloader::run()
@@ -173,6 +175,16 @@ void downloader::shutdown()
 	console.reset();
 	// Clean up
 	spdlog::drop_all();
+}
+
+void downloader::clean_up() const
+{
+	// Clean up Output folder before starting
+	if (fs::exists("Output"))
+	{
+		console->info("Detected left over files. Cleaning up.");
+		fs::remove_all("Output");
+	}
 }
 
 std::optional<std::string> downloader::get_current_data_url()

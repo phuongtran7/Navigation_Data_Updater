@@ -23,6 +23,7 @@ class downloader
 	std::optional<std::string> get_current_data_url();
 	std::optional<std::string> extract_zip_file_name(const std::string& input);
 	void convert_to_x_plane_format() const;
+	void clean_up() const;
 public:
 	std::shared_ptr<spdlog::logger> console{};
 	void initialize();
