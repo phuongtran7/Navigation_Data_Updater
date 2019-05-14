@@ -1,0 +1,30 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[normalem]{ulem}
+\usepackage[margin=1in]{geometry}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\graphicspath{{./Images/}}
+
+\setlength{\footnotesep}{\baselineskip}
+
+\title{Updating Zibo Mod}
+
+\begin{document}
+\maketitle
+\section{Procedures}
+\begin{enumerate}
+	\item Go inside Zibo Mod installation folder\textbackslash plugins\textbackslash xlua\textbackslash scripts\textbackslash B738.fms\textbackslash.
+	\item Open B738.fms.lua.
+	\item Search for the string "cycle\_n".
+	\item Increase the number of cycle by 1. For example, if "cycle\_n" = 32 then increase it to 32.
+	\item Go down to "cycle\_data" and add one more entry at the end of the array.
+	\item The first number of the new entry is the index, second is cycle number and third is active period.
+	\item To find the cycle number open "earth\_nav.dat" in the "Output" folder. The cycle number will be on second line of the file.
+	\item Go over: \url{https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/cifp/download/} and compare the cycle number to the zip file name to find the correct active period.
+	\item Make sure to have a comma "," at the end of the previous entry of "cycle\_data" and have the correct indentation to the newly added entry.
+	\item Start X-Plane and Zibo Mod to confirm the new database is working.
+\end{enumerate}
+\end{document}
