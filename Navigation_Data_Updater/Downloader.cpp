@@ -45,7 +45,7 @@ void downloader::download_current_data(std::optional<std::string> url)
 			.then([=](const istream & is)
 				{
 					// Get the whole file name and extension
-					auto rwbuf = file_buffer<uint8_t>::open(conversions::to_string_t(file_name_->c_str())).get();
+					auto rwbuf = file_buffer<uint8_t>::open(conversions::to_string_t(*file_name_)).get();
 					// ReSharper disable once CppExpressionWithoutSideEffects
 					is.read_to_end(rwbuf).get();
 					rwbuf.close().get();
@@ -131,7 +131,7 @@ void downloader::extract_files() const
 		fs::create_directory("Output");
 
 		// Extract and override the current files with whole file name and extension
-		extractor.extract(conversions::to_string_t(file_name_->c_str()), L"Output/");
+		extractor.extract(conversions::to_string_t(*file_name_), L"Output/");
 
 		fs::remove(file_name_->c_str());
 	}
