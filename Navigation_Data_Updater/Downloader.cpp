@@ -161,7 +161,7 @@ void downloader::run()
 	const auto url = get_current_data_url();
 	download_current_data(url);
 	extract_files();
-	convert_to_x_plane_format();
+	convert_to_x_plane_format_new();
 	get_expiration_date();
 }
 
@@ -291,5 +291,33 @@ void downloader::convert_to_x_plane_format() const
 			break;
 		}
 	}
+}
 
+bool downloader::convert_to_x_plane_format_new() {
+	console->info("Start converting FAACIFP18 to X-Plane format. Please wait.");
+
+	// Delete everything that is not FAACIFP18 file
+
+	for (auto& p : fs::directory_iterator("Output"))
+	{
+		if (p.path().filename() != "FAACIFP18")
+		fs::remove(p);
+	}
+
+	// Copy X-Plane tool to Output folder to convert FAACIFP18 file
+	try
+	{
+		fs::copy_file("convert424toxplane11.exe", "Output\\convert424toxplane11.exe", fs::copy_options::overwrite_existing);
+	}
+	catch (fs::filesystem_error&)
+	{
+		console->critical("convert424toxplane11.exe not found.");
+		fs::remove_all("Output");
+		return false;
+	}
+	std::system("cd Output && convert424toxplane11 FAACIFP18 \"CSF\"");
+	fs::rename("Output\\FAACIFP18", "Output\\earth_424.dat");
+	fs::remove("Output\\convert424toxplane11.exe");
+
+	return true;
 }
